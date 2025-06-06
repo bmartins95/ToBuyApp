@@ -1,6 +1,7 @@
 import { View, Image } from "react-native";
 
 import { Button } from "@/componnets/button"
+import { Input } from "@/componnets/input";
 
 import { styles } from "./styles"
 
@@ -8,6 +9,7 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <Image source={require("@/assets/logo.png")} style={styles.logo}></Image>
+      <Input placeholder="What do you need to buy?"></Input>
       <Button title="Add"></Button>
     </View>
   );
