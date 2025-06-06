@@ -9,8 +9,15 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <Image source={require("@/assets/logo.png")} style={styles.logo}></Image>
-      <Input placeholder="What do you need to buy?"></Input>
-      <Button title="Add"></Button>
+
+      <View style={styles.form}>
+        <Input placeholder="What do you need to buy?"></Input>
+        <Button title="Add"></Button>
+      </View>
+
+      <View style={styles.content}>
+
+      </View>
     </View>
   );
 }
