@@ -1,22 +1,23 @@
 import { View, Image, TouchableOpacity, Text, FlatList, Alert } from "react-native";
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 import { Button } from "@/componnets/button"
 import { Input } from "@/componnets/input";
 import { Filter } from "@/componnets/filter";
 import { FilterStatus } from "@/types/filter-status";
+import { Item } from "@/componnets/item";
+import { itemsStorage, ItemStorage } from "@/storage/item-storage";
 
 import { styles } from "./styles"
-import { Item } from "@/componnets/item";
 
 const FILTER_STATUS: FilterStatus[] = [FilterStatus.PENDING, FilterStatus.DONE]
 
 export default function Home() {
   const [filter, setFilter] = useState(FilterStatus.PENDING)
   const [description, setDescription] = useState("")
-  const [items, setItems] = useState<any>([])
+  const [items, setItems] = useState<ItemStorage[]>([])
 
-  function handleAdd() {
+  async function handleAdd() {
     if (!description.trim()) {
       return Alert.alert("Add", "Please, inform item description.")
     }
@@ -27,8 +28,23 @@ export default function Home() {
       status: FilterStatus.PENDING,
     }
 
-    setItems((prevState) => [...prevState, newItem])
+    await itemsStorage.add(newItem)
+    await getItems()
   }
+
+  async function getItems() {
+    try {
+      const response = await itemsStorage.get()
+      setItems(response)
+    }
+    catch (error) {
+      Alert.alert("Error", "Error while getting items.")
+    }
+  }
+
+  useEffect(() => {
+    getItems()
+  }, [])
 
   return (
     <View style={styles.container}>
