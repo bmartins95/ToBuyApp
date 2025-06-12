@@ -29,12 +29,54 @@ export default function Home() {
     }
 
     await itemsStorage.add(newItem)
-    await getItems()
+    await updateItemsByStatus()
+
+    setDescription("")
+    setFilter(FilterStatus.PENDING)
   }
 
-  async function getItems() {
+  async function handleRemove(id: string) {
     try {
-      const response = await itemsStorage.get()
+      await itemsStorage.remove(id)
+      await updateItemsByStatus()
+    }
+    catch (error) {
+      return Alert.alert("Remove", "Failed to remove item.")
+    }
+  }
+
+  function handleClear() {
+    Alert.alert("Clear", "Are you sure you want to remove all items?", [
+      { text: "Yes", onPress: () => onClear() },
+      { text: "No", style: "cancel" },
+    ])
+  }
+
+  async function handleChangeStatus(id: string) {
+    try {
+      const item = await itemsStorage.getById(id)
+      item.status = item.status === FilterStatus.PENDING ? FilterStatus.DONE : FilterStatus.PENDING
+      await itemsStorage.update(item)
+      await updateItemsByStatus()
+    }
+    catch (error) {
+      return Alert.alert("Change Status", "Failed to change item status.")
+    }
+  }
+
+  async function onClear() {
+    try {
+      await itemsStorage.clear()
+      await updateItemsByStatus()
+    }
+    catch (error) {
+      return Alert.alert("Clear", "Failed to clear items.")
+    }
+  }
+
+  async function updateItemsByStatus() {
+    try {
+      const response = await itemsStorage.getByStatus(filter)
       setItems(response)
     }
     catch (error) {
@@ -43,8 +85,8 @@ export default function Home() {
   }
 
   useEffect(() => {
-    getItems()
-  }, [])
+    updateItemsByStatus()
+  }, [filter])
 
   return (
     <View style={styles.container}>
@@ -54,6 +96,7 @@ export default function Home() {
         <Input
           placeholder="What do you need to buy?"
           onChangeText={setDescription}
+          value={description}
         ></Input>
         <Button
           title="Add"
@@ -73,7 +116,7 @@ export default function Home() {
               ></Filter>
             )
           }
-          <TouchableOpacity style={styles.clearButton}>
+          <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
             <Text style={styles.clearText}>Clear</Text>
           </TouchableOpacity>
         </View>
@@ -84,8 +127,8 @@ export default function Home() {
           renderItem={({ item }) => (
             <Item
               data={item}
-              onRemove={() => { }}
-              onStatus={() => { }}
+              onRemove={() => { handleRemove(item.id) }}
+              onStatus={() => { handleChangeStatus(item.id) }}
             ></Item>
           )}
           showsVerticalScrollIndicator={false}
